@@ -41,26 +41,24 @@ export const Game = ({ children }: { children: React.ReactNode }) => {
 
 
     const pickCard = (index: number) => {
-        if (cards[index].found) return
-        if (flippedCardsIndex.includes(index)) return
+        if (cards[index].found || flippedCardsIndex.includes(index) || flippedCardsIndex.length > 1) return
+
 
         const _cards = [...cards];
-
-        if (flippedCardsIndex.length === 2) {
-            _cards[flippedCardsIndex[0]] = { ..._cards[flippedCardsIndex[0]], isFlipped: false };
-            _cards[flippedCardsIndex[1]] = { ..._cards[flippedCardsIndex[1]], isFlipped: false };
-        }
 
         _cards[index] = { ..._cards[index], isFlipped: true };
         setCards([..._cards]);
 
         if (flippedCardsIndex.length === 1) {
+            // if (index === flippedCardsIndex[0]) return
             setFlippedCardsIndex([...flippedCardsIndex, index]);
             return
         }
 
 
         setFlippedCardsIndex([index]);
+
+
     }
 
     useEffect(() => {
@@ -70,28 +68,19 @@ export const Game = ({ children }: { children: React.ReactNode }) => {
                 _cards[flippedCardsIndex[0]] = { ..._cards[flippedCardsIndex[0]], found: true };
                 _cards[flippedCardsIndex[1]] = { ..._cards[flippedCardsIndex[1]], found: true };
                 setCards(_cards);
+                setFlippedCardsIndex([])
+            } else {
+                setTimeout(() => {
+                    const _cards = [...cards];
+                    _cards[flippedCardsIndex[0]] = { ..._cards[flippedCardsIndex[0]], isFlipped: false };
+                    _cards[flippedCardsIndex[1]] = { ..._cards[flippedCardsIndex[1]], isFlipped: false };
+                    setCards(_cards);
+                    setFlippedCardsIndex([])
+                }, 1000)
             }
+
         }
     }, [flippedCardsIndex])
-
-    // useEffect(() => {
-    //     console.log("firstCardIndex", firstCardIndex);
-    //     console.log("secondCardIndex", secondCardIndex);
-
-
-    //     console.log("cards[firstCardIndex]", cards[firstCardIndex]);
-    //     console.log("cards[secondCardIndex]", cards[secondCardIndex]);
-
-
-    //     if (cards[firstCardIndex]?.id === cards[secondCardIndex]?.id) {
-    //         const _cards = [...cards];
-    //         _cards[firstCardIndex] = { ..._cards[firstCardIndex], found: true };
-    //         _cards[secondCardIndex] = { ..._cards[secondCardIndex], found: true };
-    //         setCards(_cards);
-    //     };
-
-
-    // }, [secondCardIndex])
 
     useEffect(() => {
         console.log(cards)
