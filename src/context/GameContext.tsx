@@ -22,83 +22,73 @@ const srcs = [
 
 export const Game = ({ children }: { children: React.ReactNode }) => {
     const [cards, setCards] = useState<IDataCard[]>(() => {
-        const cards = srcs.map((src, index) => ({ index: index, id: index, src: src, show: false, found: false }))
-
-        cards.forEach(card => {
-            cards.push({ ...card });
-        })
+        const cards = srcs.map((src, index) => { console.log(index); return { id: index, src: src, isFlipped: false, found: false } })
 
         for (let i = cards.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [cards[i], cards[j]] = [cards[j], cards[i]];
         }
 
-        return cards
+        return [...cards, ...cards]
     })
+
 
     const [firstCard, setFirstCard] = useState<IDataCard | undefined>(undefined);
     const [secondCard, setSecondCard] = useState<IDataCard | undefined>(undefined);
-    const [found, setFound] = useState(Boolean);
+
 
     const pickCard = (data: IDataCard) => {
-        if (data.found) return
+
+        // if (data.found) return
 
         if (!firstCard) {
             setFirstCard(data);
             return
         }
 
-        if (firstCard && !secondCard) {
-            if (firstCard.index === data.index) return
-            setSecondCard(data);
-            return
-        } else {
-            if (secondCard) {
-                const _cards = [...cards];
-                _cards[firstCard.index] = { ...firstCard, show: false };
-                _cards[secondCard.index] = { ...secondCard, show: false };
+        setSecondCard(data);
 
-                setCards(_cards);
+        // if (firstCard && !secondCard) {
+        //     if (firstCard.index === data.index) return
+        //     setSecondCard(data);
+        //     return
+        // } else {
+        //     if (secondCard) {
+        //         const _cards = [...cards];
+        //         _cards[firstCard.index] = { ...firstCard, show: false };
+        //         _cards[secondCard.index] = { ...secondCard, show: false };
 
-                setFirstCard(data);
-                setSecondCard(undefined);
-                return
-            }
-        }
+        //         setCards(_cards);
+
+        //         setFirstCard(data);
+        //         setSecondCard(undefined);
+        //         return
+        //     }
+        // }
     }
 
-    useEffect(() => {
-        console.log("firstCard", firstCard);
-        if (firstCard) {
-            const _cards = [...cards];
-            _cards[firstCard.index].show = true;
-            setCards(_cards);
-        }
-    }, [firstCard])
-    
-    useEffect(() => {
-        console.log("secondCard", secondCard);
-        if (secondCard) {
-            const _cards = [...cards];
-            _cards[secondCard.index].show = true;
+    // useEffect(() => {
+    //     if (firstCard) {
+    //         const _cards = [...cards];
+    //         _cards[firstCard.index].isFlipped = true;
+    //         setCards(_cards);
+    //     }
+    // }, [firstCard])
 
-            if (firstCard && firstCard?.id === secondCard?.id) {
-                _cards[firstCard.index] = { ...firstCard, found: true };
-                _cards[secondCard.index] = { ...secondCard, found: true };
-            };
+    // useEffect(() => {
+    //     console.log("secondCard", secondCard);
+    //     if (secondCard) {
+    //         const _cards = [...cards];
+    //         _cards[secondCard.index].show = true;
 
-            setCards(_cards);
-        }
-    }, [secondCard])
+    //         if (firstCard && firstCard?.id === secondCard?.id) {
+    //             _cards[firstCard.index] = { ...firstCard, found: true };
+    //             _cards[secondCard.index] = { ...secondCard, found: true };
+    //         };
 
-    const compare = () => {
-        return firstCard?.id === secondCard?.id
-    }
-
-
-    useEffect(()=>{
-        console.log(cards)
-    }, [cards])
+    //         setCards(_cards);
+    //     }
+    // }, [secondCard])
 
     return (
         <GameContext.Provider value={{ cards, pickCard }}>

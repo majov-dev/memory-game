@@ -1,7 +1,6 @@
 interface IDataCard {
-  index: number,
   id: number,
   src: string,
-  show: boolean,
-  found: boolean,
+  isFlipped: boolean
+  found: boolean
 }
