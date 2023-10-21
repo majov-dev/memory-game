@@ -13,7 +13,7 @@ const Home = () => {
         <Grid container spacing={4} marginTop={4} >
           {cards.map((card, index) => {
             return <Grid key={index} item xs={3} height={256}>
-              <Card data={card}></Card>
+              <Card data={card} index={index}></Card>
             </Grid>
           }
           )}

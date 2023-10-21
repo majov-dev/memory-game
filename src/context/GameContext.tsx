@@ -1,12 +1,12 @@
 import { createContext, useEffect, useState } from "react";
 interface Game {
     cards: IDataCard[];
-    pickCard: (data: IDataCard) => void;
+    pickCard: (index: number) => void;
 
 }
 export const GameContext = createContext<Game>({
     cards: [],
-    pickCard: function (_data: IDataCard): void {
+    pickCard: function (_index: number): void {
         throw new Error("Function not implemented.");
     }
 });
@@ -20,75 +20,82 @@ const srcs = [
     "src/assets/images/pexels-till-daling-12461880.jpg",
 ];
 
+const shuffleArray = (array: any[]) => {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+};
+
+
 export const Game = ({ children }: { children: React.ReactNode }) => {
     const [cards, setCards] = useState<IDataCard[]>(() => {
-        const cards = srcs.map((src, index) => { console.log(index); return { id: index, src: src, isFlipped: false, found: false } })
+        const cards = srcs.map((src, index) => ({ id: index, src: src, isFlipped: false, found: false }))
 
-        for (let i = cards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [cards[i], cards[j]] = [cards[j], cards[i]];
-        }
-
-        return [...cards, ...cards]
+        return shuffleArray([...cards, ...cards]);
     })
 
-
-    const [firstCard, setFirstCard] = useState<IDataCard | undefined>(undefined);
-    const [secondCard, setSecondCard] = useState<IDataCard | undefined>(undefined);
+    const [flippedCardsIndex, setFlippedCardsIndex] = useState<number[]>([]);
 
 
-    const pickCard = (data: IDataCard) => {
+    const pickCard = (index: number) => {
+        if (cards[index].found) return
+        if (flippedCardsIndex.includes(index)) return
 
-        // if (data.found) return
+        const _cards = [...cards];
 
-        if (!firstCard) {
-            setFirstCard(data);
+        if (flippedCardsIndex.length === 2) {
+            _cards[flippedCardsIndex[0]] = { ..._cards[flippedCardsIndex[0]], isFlipped: false };
+            _cards[flippedCardsIndex[1]] = { ..._cards[flippedCardsIndex[1]], isFlipped: false };
+        }
+
+        _cards[index] = { ..._cards[index], isFlipped: true };
+        setCards([..._cards]);
+
+        if (flippedCardsIndex.length === 1) {
+            setFlippedCardsIndex([...flippedCardsIndex, index]);
             return
         }
 
-        setSecondCard(data);
 
-        // if (firstCard && !secondCard) {
-        //     if (firstCard.index === data.index) return
-        //     setSecondCard(data);
-        //     return
-        // } else {
-        //     if (secondCard) {
-        //         const _cards = [...cards];
-        //         _cards[firstCard.index] = { ...firstCard, show: false };
-        //         _cards[secondCard.index] = { ...secondCard, show: false };
-
-        //         setCards(_cards);
-
-        //         setFirstCard(data);
-        //         setSecondCard(undefined);
-        //         return
-        //     }
-        // }
+        setFlippedCardsIndex([index]);
     }
 
-    // useEffect(() => {
-    //     if (firstCard) {
-    //         const _cards = [...cards];
-    //         _cards[firstCard.index].isFlipped = true;
-    //         setCards(_cards);
-    //     }
-    // }, [firstCard])
+    useEffect(() => {
+        if (flippedCardsIndex.length === 2) {
+            if (cards[flippedCardsIndex[0]].id === cards[flippedCardsIndex[1]].id) {
+                const _cards = [...cards];
+                _cards[flippedCardsIndex[0]] = { ..._cards[flippedCardsIndex[0]], found: true };
+                _cards[flippedCardsIndex[1]] = { ..._cards[flippedCardsIndex[1]], found: true };
+                setCards(_cards);
+            }
+        }
+    }, [flippedCardsIndex])
 
     // useEffect(() => {
-    //     console.log("secondCard", secondCard);
-    //     if (secondCard) {
+    //     console.log("firstCardIndex", firstCardIndex);
+    //     console.log("secondCardIndex", secondCardIndex);
+
+
+    //     console.log("cards[firstCardIndex]", cards[firstCardIndex]);
+    //     console.log("cards[secondCardIndex]", cards[secondCardIndex]);
+
+
+    //     if (cards[firstCardIndex]?.id === cards[secondCardIndex]?.id) {
     //         const _cards = [...cards];
-    //         _cards[secondCard.index].show = true;
-
-    //         if (firstCard && firstCard?.id === secondCard?.id) {
-    //             _cards[firstCard.index] = { ...firstCard, found: true };
-    //             _cards[secondCard.index] = { ...secondCard, found: true };
-    //         };
-
+    //         _cards[firstCardIndex] = { ..._cards[firstCardIndex], found: true };
+    //         _cards[secondCardIndex] = { ..._cards[secondCardIndex], found: true };
     //         setCards(_cards);
-    //     }
-    // }, [secondCard])
+    //     };
+
+
+    // }, [secondCardIndex])
+
+    useEffect(() => {
+        console.log(cards)
+    }, [cards])
 
     return (
         <GameContext.Provider value={{ cards, pickCard }}>
